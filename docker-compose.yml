@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  app:
+    container_name: api-ai-bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgress@db:5432/backend-bot?schema=public
+      - REDIS_HOST=redis
+    ports:
+      - '3001:3001'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+  db:
+    image: postgres
+    container_name: db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgress
+      - POSTGRES_DB=backend-bot
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - '6380:6379'
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+volumes:
+  pgdata:
+  redisdata:

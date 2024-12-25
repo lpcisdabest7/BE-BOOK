@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Application {
+  id             String         @id
+  code           String         @unique
+  appName        String         @db.VarChar(255)
+  bundleId       String?
+  description    String?        @db.Text()
+  serviceAccount Json?
+  isActive       Boolean        @default(true)
+  createdById    String
+  CreatedBy      Account        @relation(fields: [createdById], name: "CreatedApplications", references: [id])
+  updatedById    String
+  UpdatedBy      Account        @relation(fields: [updatedById], name: "UpdatedApplications", references: [id])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  ApiKeys        ApiKey[]
+  Bots           Bot[]
+  Users          User[]
+  ApiSignature   ApiSignature[]
+}
+
+model ApiKey {
+  id            String      @id
+  name          String?
+  secretKey     String
+  isActive      Boolean     @default(true)
+  priority      Int
+  applicationId String
+  serviceName   String
+  Application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Account {
+  id                  String        @id
+  username            String        @unique
+  password            String
+  isActive            Boolean       @default(true)
+  role                Role          @default(USER)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  CreatedApplications Application[] @relation("CreatedApplications")
+  UpdatedApplications Application[] @relation("UpdatedApplications")
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String?
+  name          String?
+  applicationId String
+  Application   Application   @relation(fields: [applicationId], references: [id])
+  BotMessages   BotMessage[]
+  LoginMethod   LoginMethod[]
+  Bot           Bot[]
+}
+
+model LoginMethod {
+  id         String   @id @default(uuid())
+  userId     String
+  User       User     @relation(fields: [userId], references: [id])
+  provider   String
+  providerId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Bot {
+  id               String       @id
+  code             String       @unique
+  name             String
+  shortDescription String?      @db.VarChar(555)
+  description      String?      @db.Text()
+  bio              String?      @db.VarChar(555)
+  instruction      String
+  model            String
+  isActive         Boolean      @default(true)
+  picture          String?
+  responseFormat   Json?
+  metadata         Json?
+  attributes       Json?
+  expireAt         DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  applicationId    String
+  Application      Application  @relation(fields: [applicationId], references: [id])
+  userId           String?
+  user             User?        @relation(fields: [userId], references: [id])
+  BotMessages      BotMessage[]
+}
+
+model BotMessage {
+  id         String   @id
+  content    String
+  attachment String?
+  botId      String?
+  Bot        Bot?     @relation(fields: [botId], references: [id])
+  userId     String
+  User       User     @relation(fields: [userId], references: [id])
+  sendFrom   SendFrom
+  createdAt  DateTime @default(now())
+  isShow     Boolean  @default(true)
+}
+
+model ApiSignature {
+  id            String      @id
+  apiKey        String      @unique
+  apiKeyId      String      @unique
+  publicKey     String
+  privateKey    String
+  isActive      Boolean     @default(true)
+  applicationId String
+  Application   Application @relation(fields: [applicationId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum Role {
+  ADMIN
+  USER
+  ROOT
+}
+
+enum SendFrom {
+  ASSISTANT
+  USER
+}
