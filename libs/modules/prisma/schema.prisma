@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// Đây là schema Prisma hoàn chỉnh
+generator client {
+      provider = "prisma-client-js"
+}
+
+datasource db {
+      provider = "postgresql"
+      url      = env("DB_URL")
+}
+
+model Book {
+      id            String   @id @default(uuid())
+      title         String
+      content       String
+      description   String?  @db.Text()
+      publishDate   DateTime
+      isbn          String   @unique
+      category      String // Loại sách
+      language      String
+      pageCount     Int
+      chapters      Json? // Danh sách chương
+      totalChapters Int
+      authorId      String
+      author        Author   @relation(fields: [authorId], references: [id])
+      price         Float
+      status        String // full, loading
+      creating      String // hot, sieuhot, binhthuong
+      start         Int
+      createdAt     DateTime @default(now())
+      updatedAt     DateTime @updatedAt
+      Reviews       Review[]
+      Views         View[]
+}
+
+model Author {
+      id        String   @id @default(uuid())
+      name      String
+      bio       String?
+      birthDate DateTime
+      createdAt DateTime @default(now())
+      updatedAt DateTime @updatedAt
+      Books     Book[]
+}
+
+model User {
+      id        String    @id @default(uuid())
+      username  String    @unique
+      email     String?   @unique
+      password  String
+      createdAt DateTime  @default(now())
+      updatedAt DateTime  @updatedAt
+      role      Role      @default(USER)
+      isActive  Boolean
+      Reviews   Review[]
+      Views     View[]
+      Payments  Payment[]
+      Orders    Order[]
+}
+
+model Review {
+      id        String   @id @default(uuid())
+      bookId    String
+      userId    String
+      rating    Int      @default(0)
+      comment   String?  @db.Text()
+      createdAt DateTime @default(now())
+      updatedAt DateTime @updatedAt
+      book      Book     @relation(fields: [bookId], references: [id])
+      user      User     @relation(fields: [userId], references: [id])
+}
+
+model View {
+      id        String   @id @default(uuid())
+      bookId    String
+      userId    String
+      createdAt DateTime @default(now())
+      book      Book     @relation(fields: [bookId], references: [id])
+      user      User     @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+      id            String   @id @default(uuid())
+      userId        String
+      amount        Float
+      currency      String   @default("USD")
+      status        String
+      method        String
+      transactionId String   @unique
+      description   String?  @db.Text()
+      createdAt     DateTime @default(now())
+      updatedAt     DateTime @updatedAt
+      user          User     @relation(fields: [userId], references: [id])
+      Orders        Order[]
+}
+
+model Order {
+      id          String   @id @default(uuid())
+      paymentId   String
+      userId      String
+      totalAmount Float
+      status      String
+      createdAt   DateTime @default(now())
+      updatedAt   DateTime @updatedAt
+      payment     Payment  @relation(fields: [paymentId], references: [id])
+      user        User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+      ADMIN
+      USER
+      ROOT
+}
