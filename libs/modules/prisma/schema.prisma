@@ -31,7 +31,7 @@ model Book {
       price         Float
       status        String // full, loading
       creating      String // hot, sieuhot, binhthuong
-      start         Int
+      star          Int
       createdAt     DateTime @default(now())
       updatedAt     DateTime @updatedAt
       Reviews       Review[]

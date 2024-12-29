@@ -18,7 +18,7 @@ CREATE TABLE "Book" (
     "price" DOUBLE PRECISION NOT NULL,
     "status" TEXT NOT NULL,
     "creating" TEXT NOT NULL,
-    "start" INTEGER NOT NULL,
+    "star" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
