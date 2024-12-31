@@ -38,6 +38,16 @@ export class BookService {
   async createBook(dto: CreateBookDto) {
     const publishDate = new Date(dto.publishDate);
 
+    const author = await this.prismaService.author.findFirstOrThrow({
+      where: {
+        id: dto.authorId,
+      },
+    });
+
+    if (!author) {
+      throw new ApiException('Author not found', HttpStatus.NOT_FOUND);
+    }
+
     if (isNaN(publishDate.getTime())) {
       throw new ApiException('Invalid date format', HttpStatus.BAD_REQUEST);
     }
@@ -52,7 +62,7 @@ export class BookService {
         language: dto.language,
         pageCount: dto.pageCount,
         totalChapters: dto.totalChapters,
-        authorId: dto.authorId,
+        authorId: author.id,
         price: dto.price,
         status: dto.status,
         star: dto.star,

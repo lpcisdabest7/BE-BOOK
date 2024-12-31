@@ -15,12 +15,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: secretService.authentication.secret,
+      ignoreExpiration: true,
     });
   }
 
-  async validate(args: { userId: string; role: RoleType; type: TokenType }) {
+  async validate(args: {
+    userId: string;
+    role: RoleType;
+    type: TokenType;
+    exp?: number;
+  }) {
     if (args.type !== TokenType.ACCESS_TOKEN) {
       throw new ApiException('Unauthorize', HttpStatus.UNAUTHORIZED);
+    }
+
+    if (args.exp < Date.now() / 1000) {
+      throw new ApiException('Exp time', HttpStatus.UNAUTHORIZED);
     }
 
     const user = await this.prismaService.user.findFirst({
