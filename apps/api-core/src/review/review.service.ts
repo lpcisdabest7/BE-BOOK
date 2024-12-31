@@ -13,6 +13,7 @@ export class ReviewService {
   }
 
   async createReview(dto: CreateReviewDto, userId: string) {
+    console.log(dto);
     const book = await this.prismaService.book.findFirstOrThrow({
       where: {
         id: dto.bookId,

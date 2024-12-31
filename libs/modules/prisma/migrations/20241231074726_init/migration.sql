@@ -56,7 +56,7 @@ CREATE TABLE "Review" (
     "id" TEXT NOT NULL,
     "bookId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "rating" INTEGER NOT NULL DEFAULT 0,
+    "rating" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "comment" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

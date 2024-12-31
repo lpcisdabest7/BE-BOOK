@@ -10,7 +10,29 @@ export class BookService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getAllBook() {
-    return await this.prismaService.book.findMany();
+    const books = await this.prismaService.book.findMany();
+    const reviews = await this.prismaService.review.findMany({
+      where: {
+        bookId: {
+          in: books.map((book) => book.id),
+        },
+      },
+    });
+    const booksWithStars = books.map((book) => {
+      const bookReviews = reviews.filter((review) => review.bookId === book.id);
+      const totalRatings = bookReviews.reduce(
+        (sum, review) => sum + review.rating,
+        0,
+      );
+      const averageRating =
+        bookReviews.length > 0 ? totalRatings / bookReviews.length : 0;
+      return {
+        ...book,
+        star: averageRating,
+      };
+    });
+
+    return booksWithStars;
   }
 
   async createBook(dto: CreateBookDto) {
