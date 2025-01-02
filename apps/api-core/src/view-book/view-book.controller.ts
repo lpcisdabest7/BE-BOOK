@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Auth } from 'libs/utils/decorators/http.decorator';
@@ -15,6 +16,7 @@ import { CreateViewDto } from './dto/create-view-book.dto';
 import { ViewService } from './view-book.service';
 import { AuthUser } from 'libs/utils/decorators/auth-user.decorator';
 import { User } from '@prisma/client';
+import { PageOptionsDto } from 'libs/core/dto/page-options.dto';
 
 @Controller({
   path: 'views',
@@ -27,8 +29,8 @@ export class ViewController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @Auth()
-  async getAllView() {
-    return await this.viewService.getAllView();
+  async getAllView(@Query() pagingDto: PageOptionsDto) {
+    return await this.viewService.getAllView(pagingDto);
   }
 
   @Post()
